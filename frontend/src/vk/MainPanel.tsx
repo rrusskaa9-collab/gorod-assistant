@@ -196,6 +196,8 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
     };
   }, [cards]);
 
+  const displayItems = items.length > 0 ? items : EMERGENCY_CARDS;
+
   return (
     <div className="mainPanel">
       <div className="debugBadge">source: {dataSource}</div>
@@ -213,7 +215,7 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
         <h2 className="section__title">Вам понравится</h2>
         {loading ? <div className="loading">Обновляем данные...</div> : null}
         <div className="carousel" role="list" aria-label="Рекомендации">
-          {items.map((entity) => (
+          {displayItems.map((entity) => (
             <div
               key={`${entity.entity_type}-${entity.entity_id}`}
               role="listitem"
