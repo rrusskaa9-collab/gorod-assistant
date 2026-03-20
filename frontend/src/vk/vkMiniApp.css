@@ -52,11 +52,13 @@
   overflow-x: auto;
   padding-bottom: 6px;
   scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 }
 
 .carousel__item {
   min-width: 178px;
   scroll-snap-align: start;
+  pointer-events: auto;
 }
 
 .entityCard {
@@ -68,6 +70,8 @@
   overflow: hidden;
   padding: 0;
   cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: auto;
 }
 
 .entityCard:active {
@@ -117,6 +121,24 @@
   font-size: 12px;
   color: rgba(0, 0, 0, 0.55);
   white-space: nowrap;
+}
+
+.loading {
+  padding: 8px 0 0;
+  font-size: 14px;
+  color: var(--text, rgba(0, 0, 0, 0.54));
+}
+
+.mapStats {
+  display: flex;
+  gap: 10px;
+}
+
+.mapStats__item {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  font-size: 13px;
 }
 
 .detailPanel {
@@ -176,5 +198,37 @@
   margin: 12px 0 0;
   font-size: 12px;
   color: var(--text, rgba(0, 0, 0, 0.54));
+}
+
+.reviewsBlock {
+  margin-top: 18px;
+}
+
+.reviewsBlock__title {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.reviewItem {
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.reviewItem__rating {
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.reviewItem__text {
+  font-size: 14px;
+}
+
+.reviewsBlock__more {
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 10px;
+  background: #fff;
+  padding: 8px 10px;
 }
 
