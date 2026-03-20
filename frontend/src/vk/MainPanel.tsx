@@ -2,6 +2,39 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CardsApiResponseItem, MapPoint, SearchEntity } from './types';
 import { EntityCard } from './components/EntityCard';
 
+const EMERGENCY_CARDS: SearchEntity[] = [
+  {
+    entity_type: 'place',
+    entity_id: 1,
+    place_id: 1,
+    backend_id: 'fallback:1',
+    title: 'Лес & Кофе',
+    subtitle: 'Кафе',
+    rating: 4.7,
+    imageUrl: 'https://picsum.photos/seed/fallback1/512/320.webp',
+  },
+  {
+    entity_type: 'place',
+    entity_id: 2,
+    place_id: 2,
+    backend_id: 'fallback:2',
+    title: 'Neon Burger',
+    subtitle: 'Ресторан',
+    rating: 4.6,
+    imageUrl: 'https://picsum.photos/seed/fallback2/512/320.webp',
+  },
+  {
+    entity_type: 'place',
+    entity_id: 3,
+    place_id: 3,
+    backend_id: 'fallback:3',
+    title: 'Бар у Рейна',
+    subtitle: 'Бар',
+    rating: 4.5,
+    imageUrl: 'https://picsum.photos/seed/fallback3/512/320.webp',
+  },
+];
+
 type Props = {
   onOpenEntity: (entity: SearchEntity) => void;
 };
@@ -10,9 +43,10 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
   const [query, setQuery] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [cards, setCards] = useState<SearchEntity[] | null>(null);
+  const [cards, setCards] = useState<SearchEntity[] | null>(EMERGENCY_CARDS);
   const [loading, setLoading] = useState(true);
   const [mapPoints, setMapPoints] = useState<MapPoint[]>([]);
+  const [dataSource, setDataSource] = useState<'v1' | 'legacy-api' | 'fallback'>('fallback');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -20,30 +54,60 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
     async function load() {
       try {
         setLoading(true);
-        const res = await fetch('/v1/restaurants/popular?limit=20', { signal: controller.signal });
-        if (!res.ok) throw new Error(`API error: ${res.status}`);
-        const data = (await res.json()) as CardsApiResponseItem[];
+        const timeout = window.setTimeout(() => controller.abort(), 3500);
+        // 1) основной путь: FastAPI v1
+        let data: CardsApiResponseItem[] | null = null;
+        const v1 = await fetch('/v1/restaurants/popular?limit=20', { signal: controller.signal });
+        if (v1.ok) {
+          data = (await v1.json()) as CardsApiResponseItem[];
+          setDataSource('v1');
+        } else {
+          // 2) fallback: старый /api/cards (итерация 4 express)
+          const legacy = await fetch('/api/cards?limit=20', { signal: controller.signal });
+          if (legacy.ok) {
+            const legacyData = (await legacy.json()) as Array<{
+              id: string;
+              title: string;
+              image: string;
+              rating: number;
+            }>;
+            data = legacyData.map((x) => ({
+              id: x.id,
+              title: x.title,
+              image: x.image,
+              rating: x.rating,
+              category: 'Ресторан',
+            }));
+            setDataSource('legacy-api');
+          }
+        }
 
-        const mapped: SearchEntity[] = data.map((item, index) => {
-          const numericId = index + 1;
+        if (!data || data.length === 0) {
+          setCards(EMERGENCY_CARDS);
+          setDataSource('fallback');
+          window.clearTimeout(timeout);
+          return;
+        }
 
-          return {
-            entity_type: 'place',
-            entity_id: numericId,
-            place_id: numericId,
-            backend_id: item.id,
-            title: item.title,
-            subtitle: item.category,
-            rating: item.rating,
-            imageUrl: item.image,
-          };
-        });
+        const mapped: SearchEntity[] = data.map((item, index) => ({
+          entity_type: 'place',
+          entity_id: index + 1,
+          place_id: index + 1,
+          backend_id: item.id,
+          title: item.title,
+          subtitle: item.category,
+          rating: item.rating,
+          imageUrl: item.image,
+        }));
 
-        setCards(mapped);
+        setCards(mapped.length > 0 ? mapped : EMERGENCY_CARDS);
+        if (mapped.length === 0) setDataSource('fallback');
+        window.clearTimeout(timeout);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('[cards api] failed to load:', e);
-        setCards([]);
+        setCards(EMERGENCY_CARDS);
+        setDataSource('fallback');
       } finally {
         setLoading(false);
       }
@@ -76,20 +140,40 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
     const controller = new AbortController();
     async function loadMap() {
       try {
+        const timeout = window.setTimeout(() => controller.abort(), 3500);
         const res = await fetch(
           '/v1/restaurants/map?min_lat=55.62&min_lng=37.45&max_lat=55.90&max_lng=37.82&zoom=12&limit=1000',
           { signal: controller.signal },
         );
-        if (!res.ok) return;
+        if (!res.ok) {
+          setMapPoints(
+            (cards ?? EMERGENCY_CARDS).map((c, i) => ({
+              id: c.backend_id ?? `fallback-map:${i}`,
+              kind: 'point',
+              lat: 55.75 + i * 0.001,
+              lng: 37.61 + i * 0.001,
+            })),
+          );
+          window.clearTimeout(timeout);
+          return;
+        }
         const data = (await res.json()) as MapPoint[];
         setMapPoints(data);
+        window.clearTimeout(timeout);
       } catch {
-        setMapPoints([]);
+        setMapPoints(
+          (cards ?? EMERGENCY_CARDS).map((c, i) => ({
+            id: c.backend_id ?? `fallback-map:${i}`,
+            kind: 'point',
+            lat: 55.75 + i * 0.001,
+            lng: 37.61 + i * 0.001,
+          })),
+        );
       }
     }
     loadMap();
     return () => controller.abort();
-  }, []);
+  }, [cards]);
 
   const bestMonthItems: SearchEntity[] = useMemo(() => {
     if (!cards) return [];
@@ -114,6 +198,7 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
 
   return (
     <div className="mainPanel">
+      <div className="debugBadge">source: {dataSource}</div>
       <div className="mainPanel__search">
         <input
           className="mainPanel__searchInput"
@@ -126,88 +211,78 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
 
       <section className="section">
         <h2 className="section__title">Вам понравится</h2>
-        {loading ? <div className="loading">Загрузка...</div> : null}
-        {!loading ? (
-          <div className="carousel" role="list" aria-label="Рекомендации">
-            {items.map((entity) => (
-              <div
-                key={`${entity.entity_type}-${entity.entity_id}`}
-                role="listitem"
-                className="carousel__item"
-              >
-                <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
-              </div>
-            ))}
-          </div>
-        ) : null}
+        {loading ? <div className="loading">Обновляем данные...</div> : null}
+        <div className="carousel" role="list" aria-label="Рекомендации">
+          {items.map((entity) => (
+            <div
+              key={`${entity.entity_type}-${entity.entity_id}`}
+              role="listitem"
+              className="carousel__item"
+            >
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="section">
         <h2 className="section__title">Лучшее за месяц</h2>
-        {!loading ? (
-          <div className="carousel" role="list" aria-label="Лучшее за месяц">
-            {bestMonthItems.map((entity) => (
-              <div
-                key={`${entity.entity_type}-${entity.entity_id}`}
-                role="listitem"
-                className="carousel__item"
-              >
-                <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <div className="carousel" role="list" aria-label="Лучшее за месяц">
+          {bestMonthItems.map((entity) => (
+            <div
+              key={`${entity.entity_type}-${entity.entity_id}`}
+              role="listitem"
+              className="carousel__item"
+            >
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="section">
         <h2 className="section__title">Рестораны</h2>
-        {!loading ? (
-          <div className="placeList" role="list" aria-label="Рестораны по рейтингу">
-            {byCategory.restaurants.map((entity) => (
-              <div
-                key={`${entity.entity_type}-${entity.entity_id}`}
-                role="listitem"
-                className="placeList__item"
-              >
-                <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <div className="placeList" role="list" aria-label="Рестораны по рейтингу">
+          {byCategory.restaurants.map((entity) => (
+            <div
+              key={`${entity.entity_type}-${entity.entity_id}`}
+              role="listitem"
+              className="placeList__item"
+            >
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="section">
         <h2 className="section__title">Бары</h2>
-        {!loading ? (
-          <div className="placeList" role="list" aria-label="Бары по рейтингу">
-            {byCategory.bars.map((entity) => (
-              <div
-                key={`${entity.entity_type}-${entity.entity_id}`}
-                role="listitem"
-                className="placeList__item"
-              >
-                <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <div className="placeList" role="list" aria-label="Бары по рейтингу">
+          {byCategory.bars.map((entity) => (
+            <div
+              key={`${entity.entity_type}-${entity.entity_id}`}
+              role="listitem"
+              className="placeList__item"
+            >
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="section">
         <h2 className="section__title">Кафе</h2>
-        {!loading ? (
-          <div className="placeList" role="list" aria-label="Кафе по рейтингу">
-            {byCategory.cafes.map((entity) => (
-              <div
-                key={`${entity.entity_type}-${entity.entity_id}`}
-                role="listitem"
-                className="placeList__item"
-              >
-                <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <div className="placeList" role="list" aria-label="Кафе по рейтингу">
+          {byCategory.cafes.map((entity) => (
+            <div
+              key={`${entity.entity_type}-${entity.entity_id}`}
+              role="listitem"
+              className="placeList__item"
+            >
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="section">
