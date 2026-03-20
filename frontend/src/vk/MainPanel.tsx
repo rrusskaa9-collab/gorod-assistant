@@ -3,7 +3,11 @@ import type { SearchEntity } from './types';
 import { ALL_FOR_SEARCH, FAVORITES, PLACES } from './mockData';
 import { EntityCard } from './components/EntityCard';
 
-export const MainPanel = () => {
+type Props = {
+  onOpenEntity: (entity: SearchEntity) => void;
+};
+
+export const MainPanel = ({ onOpenEntity }: Props) => {
   const [query, setQuery] = useState('');
 
   const items: SearchEntity[] = useMemo(() => {
@@ -85,7 +89,7 @@ export const MainPanel = () => {
               role="listitem"
               className="carousel__item"
             >
-              <EntityCard entity={entity} />
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
             </div>
           ))}
         </div>
@@ -100,7 +104,7 @@ export const MainPanel = () => {
               role="listitem"
               className="placeList__item"
             >
-              <EntityCard entity={entity} />
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
             </div>
           ))}
         </div>
@@ -115,7 +119,7 @@ export const MainPanel = () => {
               role="listitem"
               className="placeList__item"
             >
-              <EntityCard entity={entity} />
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
             </div>
           ))}
         </div>
@@ -130,7 +134,7 @@ export const MainPanel = () => {
               role="listitem"
               className="placeList__item"
             >
-              <EntityCard entity={entity} />
+              <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
             </div>
           ))}
         </div>
