@@ -42,6 +42,9 @@ type Props = {
 export const MainPanel = ({ onOpenEntity }: Props) => {
   const [query, setQuery] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState<'restaurant' | 'dish' | 'drink'>('restaurant');
+  const [searchResults, setSearchResults] = useState<SearchEntity[]>([]);
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   const [cards, setCards] = useState<SearchEntity[] | null>(EMERGENCY_CARDS);
   const [loading, setLoading] = useState(true);
@@ -138,6 +141,54 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
 
   useEffect(() => {
     const controller = new AbortController();
+    async function loadSearch() {
+      const q = searchQuery.trim();
+      if (!q) {
+        setSearchResults([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/v1/search?q=${encodeURIComponent(q)}&type=${searchType}&limit=12`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          throw new Error(`search status ${res.status}`);
+        }
+        const data = (await res.json()) as Array<{
+          id: string;
+          title: string;
+          type: 'restaurant' | 'dish' | 'drink';
+          rating?: number;
+        }>;
+        const mapped: SearchEntity[] = data.map((item, index) => ({
+          entity_type: item.type === 'restaurant' ? 'place' : item.type,
+          entity_id: 2000 + index,
+          place_id: undefined,
+          backend_id: item.id,
+          title: item.title,
+          subtitle: item.type === 'restaurant' ? 'Ресторан' : item.type === 'dish' ? 'Блюдо' : 'Напиток',
+          rating: item.rating,
+          imageUrl: `https://picsum.photos/seed/search-${item.id}/512/320.webp`,
+        }));
+        setSearchResults(mapped);
+      } catch {
+        const qLower = q.toLowerCase();
+        const local = (cards ?? EMERGENCY_CARDS)
+          .filter(
+            (e) =>
+              e.title.toLowerCase().includes(qLower) ||
+              e.subtitle.toLowerCase().includes(qLower),
+          )
+          .slice(0, 12);
+        setSearchResults(local);
+      }
+    }
+    void loadSearch();
+    return () => controller.abort();
+  }, [searchQuery, searchType, cards]);
+
+  useEffect(() => {
+    const controller = new AbortController();
     async function loadMap() {
       try {
         const timeout = window.setTimeout(() => controller.abort(), 3500);
@@ -207,9 +258,63 @@ export const MainPanel = ({ onOpenEntity }: Props) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Поиск по заведениям, блюдам и напиткам"
-          disabled={loading}
         />
+        <div className="searchTypeSwitch" role="tablist" aria-label="Тип поиска">
+          <button
+            className={`searchTypeSwitch__btn ${searchType === 'restaurant' ? 'is-active' : ''}`}
+            onClick={() => setSearchType('restaurant')}
+          >
+            Рестораны
+          </button>
+          <button
+            className={`searchTypeSwitch__btn ${searchType === 'dish' ? 'is-active' : ''}`}
+            onClick={() => setSearchType('dish')}
+          >
+            Блюда
+          </button>
+          <button
+            className={`searchTypeSwitch__btn ${searchType === 'drink' ? 'is-active' : ''}`}
+            onClick={() => setSearchType('drink')}
+          >
+            Напитки
+          </button>
+        </div>
       </div>
+
+      {searchQuery.trim() ? (
+        <section className="section">
+          <h2 className="section__title">Поиск: {searchQuery}</h2>
+          {searchResults.length === 0 ? <div className="loading">Ничего не найдено</div> : null}
+          <div className="placeList" role="list" aria-label="Результаты поиска">
+            {searchResults.map((entity) => (
+              <div key={`${entity.entity_type}-${entity.entity_id}`} role="listitem" className="placeList__item">
+                <EntityCard entity={entity} onClick={() => onOpenEntity(entity)} />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {searchType === 'restaurant' && searchQuery.trim() ? (
+        <section className="section">
+          <button className="mapToggleBtn" onClick={() => setMapExpanded((prev) => !prev)}>
+            {mapExpanded ? 'Скрыть карту с точками' : 'Показать карту с точками'}
+          </button>
+          {mapExpanded ? (
+            <div className="mapPreview">
+              <div className="mapPreview__title">Точки на карте по текущему viewport</div>
+              <div className="mapStats">
+                <div className="mapStats__item">
+                  Точки: {mapPoints.filter((p) => p.kind === 'point').length}
+                </div>
+                <div className="mapStats__item">
+                  Кластеры: {mapPoints.filter((p) => p.kind === 'cluster').length}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="section">
         <h2 className="section__title">Вам понравится</h2>
