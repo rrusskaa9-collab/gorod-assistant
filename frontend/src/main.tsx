@@ -9,9 +9,6 @@ import App from './App.tsx';
 import './index.css';
 import { transformVKBridgeAdaptivity } from './vk/transformVKBridgeAdaptivity';
 import './vk/vkMiniApp.css';
-import bridge from '@vkontakte/vk-bridge';
-
-bridge.send('VKWebAppInit');
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error?: Error }> {
   state: { error?: Error } = {};
