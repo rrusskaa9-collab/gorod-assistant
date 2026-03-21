@@ -10,9 +10,7 @@ type Props = {
 };
 
 const buildRouteUrl = (place: Place) =>
-  `https://yandex.ru/maps/?rtext=~${place.lat}%2C${place.lng}&rtt=auto`;
-
-const shortLabel = 'ya.ru/maps маршрут';
+  `https://yandex.ru/maps/?rtext=geo~${place.lat}%2C${place.lng}&rtt=auto`;
 
 export const PlaceDetailsSheet = ({ place, onClose, onLike, onDislike }: Props) => {
   const [reviews, setReviews] = useState(place.reviews);
@@ -50,7 +48,7 @@ export const PlaceDetailsSheet = ({ place, onClose, onLike, onDislike }: Props) 
 
         <div className="placeModal__blockTitle">Маршрут</div>
         <a className="routeLink" href={routeUrl} target="_blank" rel="noreferrer">
-          Построить маршрут в Я.Картах ({shortLabel})
+          Построить маршрут в Я.Картах
         </a>
 
         <div className="placeModal__blockTitle">Меню</div>

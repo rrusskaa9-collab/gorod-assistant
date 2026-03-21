@@ -197,27 +197,6 @@
   position: relative;
 }
 
-.swipeCard__galleryActions {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  gap: 6px;
-}
-
-.galleryArrow {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(10, 10, 12, 0.45);
-  color: #fff;
-}
-
-.galleryArrow:disabled {
-  opacity: 0.4;
-}
-
 .swipeCard__dots {
   position: absolute;
   left: 0;
@@ -244,7 +223,8 @@
   inset: auto 0 0 0;
   padding: 14px;
   background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.82) 52%);
-  cursor: pointer;
+  cursor: default;
+  pointer-events: auto;
 }
 
 .swipeCard__title {
@@ -260,6 +240,16 @@
 .swipeCard__hints {
   font-size: 12px;
   opacity: 0.85;
+}
+
+.swipeInfoBtn {
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px 9px;
+  font-size: 12px;
 }
 
 .swipeActions {
