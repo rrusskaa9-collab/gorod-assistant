@@ -18,6 +18,7 @@ export type Place = {
   photos: string[];
   lat: number;
   lng: number;
+  beautyScore: number;
   distanceKm: number;
   venueKind: VenueKind;
   foodType: FoodType;

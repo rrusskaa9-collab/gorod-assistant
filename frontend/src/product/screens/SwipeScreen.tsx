@@ -19,6 +19,7 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [maxRadius, setMaxRadius] = useState(8);
   const [maxAvgCheck, setMaxAvgCheck] = useState(3500);
+  const [minBeauty, setMinBeauty] = useState(3);
   const [foodType, setFoodType] = useState<'all' | Place['foodType']>('all');
   const [venueKind, setVenueKind] = useState<'all' | Place['venueKind']>('all');
 
@@ -27,11 +28,12 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
       places.filter((p) => {
         if (p.distanceKm > maxRadius) return false;
         if (p.avgCheckValue > maxAvgCheck) return false;
+        if (p.beautyScore < minBeauty) return false;
         if (foodType !== 'all' && p.foodType !== foodType) return false;
         if (venueKind !== 'all' && p.venueKind !== venueKind) return false;
         return true;
       }),
-    [places, maxRadius, maxAvgCheck, foodType, venueKind],
+    [places, maxRadius, maxAvgCheck, minBeauty, foodType, venueKind],
   );
 
   const current = useMemo(() => {
@@ -201,6 +203,17 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
               step={100}
               value={maxAvgCheck}
               onChange={(e) => setMaxAvgCheck(Number(e.target.value))}
+            />
+          </label>
+          <label className="settingsRow">
+            Красоты от: {minBeauty}
+            <input
+              type="range"
+              min={1}
+              max={5}
+              step={1}
+              value={minBeauty}
+              onChange={(e) => setMinBeauty(Number(e.target.value))}
             />
           </label>
           <label className="settingsRow">

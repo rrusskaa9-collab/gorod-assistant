@@ -1,64 +1,17 @@
 import type { Place } from './types';
 
-const photoSets = [
-  [
-    'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=1200&q=80',
-  ],
-  [
-    'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?auto=format&fit=crop&w=1200&q=80',
-  ],
-  [
-    'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80',
-  ],
-  [
-    'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80',
-  ],
-  [
-    'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=80',
-  ],
-];
-
-const baseNames = [
-  'Neon Burger',
-  'Лес & Кофе',
-  'Бар у Рейна',
-  'Basilico',
-  'Mia Cucina',
-  'Vinyl Taproom',
-  'Smoky Grill',
-  'Green Leaf',
-  'Fish Point',
-  'Nori House',
-];
-
-const metros = ['Тверская', 'Пушкинская', 'Новокузнецкая', 'Арбатская', 'Третьяковская', 'Белорусская'];
-const kinds: Place['venueKind'][] = ['restaurant', 'bar', 'cafe'];
-const foods: Place['foodType'][] = ['meat', 'vegetarian', 'asian', 'seafood', 'dessert', 'mixed'];
-
-const menuByFood: Record<Place['foodType'], string[]> = {
-  meat: ['Стейк', 'Бургер', 'BBQ ребра'],
-  vegetarian: ['Боул', 'Хумус', 'Овощи гриль'],
-  asian: ['Рамен', 'Том-ям', 'Суши'],
-  seafood: ['Поке', 'Креветки', 'Лосось терияки'],
-  dessert: ['Тирамису', 'Чизкейк', 'Круассан'],
-  mixed: ['Паста', 'Салат', 'Суп дня'],
-};
+const yMap = (lat: number, lng: number) =>
+  `https://static-maps.yandex.ru/1.x/?lang=ru_RU&ll=${lng},${lat}&size=650,450&z=16&l=map&pt=${lng},${lat},pm2rdm`;
+const dgisMap = (lat: number, lng: number) =>
+  `https://static.maps.2gis.com/1.0?center=${lng},${lat}&zoom=16&size=650,450&markers=${lng},${lat}`;
+const mapPhotos = (lat: number, lng: number) => [yMap(lat, lng), dgisMap(lat, lng), yMap(lat + 0.0012, lng + 0.0012)];
 
 const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-1',
     name: 'Gambrinus (Академический)',
-    photos: photoSets[0],
+    photos: mapPhotos(55.6842, 37.5722),
+    beautyScore: 3,
     lat: 55.6842,
     lng: 37.5722,
     distanceKm: 4.2,
@@ -83,7 +36,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-2',
     name: 'MOMO',
-    photos: photoSets[1],
+    photos: mapPhotos(55.7338, 37.6288),
+    beautyScore: 4,
     lat: 55.7338,
     lng: 37.6288,
     distanceKm: 5.1,
@@ -108,7 +62,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-3',
     name: 'Beluga',
-    photos: photoSets[2],
+    photos: mapPhotos(55.7572, 37.6156),
+    beautyScore: 5,
     lat: 55.7572,
     lng: 37.6156,
     distanceKm: 2.8,
@@ -133,7 +88,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-4',
     name: 'YURA Restaurant & Bar',
-    photos: photoSets[3],
+    photos: mapPhotos(55.7676, 37.6048),
+    beautyScore: 4,
     lat: 55.7676,
     lng: 37.6048,
     distanceKm: 3.4,
@@ -158,7 +114,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-5',
     name: 'Sage',
-    photos: photoSets[4],
+    photos: mapPhotos(55.7504, 37.6171),
+    beautyScore: 5,
     lat: 55.7504,
     lng: 37.6171,
     distanceKm: 2.5,
@@ -183,7 +140,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-6',
     name: 'Heritage',
-    photos: photoSets[0],
+    photos: mapPhotos(55.7478, 37.6039),
+    beautyScore: 4,
     lat: 55.7478,
     lng: 37.6039,
     distanceKm: 3.9,
@@ -208,7 +166,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-7',
     name: 'O2 Restaurant',
-    photos: photoSets[1],
+    photos: mapPhotos(55.7584, 37.6151),
+    beautyScore: 5,
     lat: 55.7584,
     lng: 37.6151,
     distanceKm: 2.1,
@@ -233,7 +192,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-8',
     name: 'Azur',
-    photos: photoSets[2],
+    photos: mapPhotos(55.7516, 37.5353),
+    beautyScore: 4,
     lat: 55.7516,
     lng: 37.5353,
     distanceKm: 6.1,
@@ -258,7 +218,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-9',
     name: 'Gambrinus (Римская)',
-    photos: photoSets[3],
+    photos: mapPhotos(55.7466, 37.6753),
+    beautyScore: 3,
     lat: 55.7466,
     lng: 37.6753,
     distanceKm: 5.7,
@@ -283,7 +244,8 @@ const WEB_PARSED_PLACES: Place[] = [
   {
     id: 'web-10',
     name: 'Ariana',
-    photos: photoSets[4],
+    photos: mapPhotos(55.7049, 37.8456),
+    beautyScore: 3,
     lat: 55.7049,
     lng: 37.8456,
     distanceKm: 9.4,
@@ -307,43 +269,69 @@ const WEB_PARSED_PLACES: Place[] = [
   },
 ];
 
-const SYNTHETIC_PLACES: Place[] = Array.from({ length: 20 }, (_, i) => {
-  const idx = i + 1;
-  const idNum = idx + 10;
-  const foodType = foods[i % foods.length];
-  const venueKind = kinds[i % kinds.length];
-  const avgCheckValue = 900 + (i % 8) * 350;
-  const distanceKm = Number((0.6 + (i % 12) * 0.45).toFixed(1));
-  const noise: Place['noise'] = i % 3 === 0 ? 'high' : i % 3 === 1 ? 'medium' : 'low';
-  const cozy: Place['cozy'] = i % 2 === 0 ? 'high' : 'low';
-  const price: Place['price'] = avgCheckValue < 1500 ? 'low' : avgCheckValue < 2600 ? 'medium' : 'high';
-  const photos = photoSets[i % photoSets.length];
-
+const REAL_EXTRA: Place[] = [
+  ['real-11', 'White Rabbit', 55.7476, 37.5819, 'Смоленская', 'restaurant', 'mixed', 4200, 5],
+  ['real-12', 'Selfie', 55.7588, 37.5849, 'Кропоткинская', 'restaurant', 'mixed', 3900, 5],
+  ['real-13', 'Twins Garden', 55.7654, 37.6064, 'Пушкинская', 'restaurant', 'mixed', 4500, 5],
+  ['real-14', 'Кафе Пушкинъ', 55.7665, 37.6045, 'Тверская', 'restaurant', 'mixed', 3400, 5],
+  ['real-15', 'Dr. Живаго', 55.7569, 37.6154, 'Охотный Ряд', 'restaurant', 'mixed', 2800, 4],
+  ['real-16', 'Turandot', 55.7648, 37.6042, 'Пушкинская', 'restaurant', 'asian', 4200, 5],
+  ['real-17', 'Sixty', 55.7491, 37.5377, 'Деловой центр', 'restaurant', 'mixed', 4100, 5],
+  ['real-18', 'Sakhalin', 55.7413, 37.5779, 'Смоленская', 'restaurant', 'seafood', 4300, 5],
+  ['real-19', 'Butler', 55.7708, 37.5848, 'Маяковская', 'restaurant', 'mixed', 3600, 4],
+  ['real-20', 'Probka', 55.7682, 37.614, 'Пушкинская', 'restaurant', 'mixed', 3000, 4],
+  ['real-21', 'Lucky Izakaya Bar', 55.7571, 37.5369, 'Улица 1905 года', 'bar', 'asian', 2900, 4],
+  ['real-22', 'Mendeleev Bar', 55.7587, 37.6244, 'Лубянка', 'bar', 'mixed', 2200, 4],
+  ['real-23', 'Delicatessen', 55.7664, 37.6001, 'Тверская', 'bar', 'mixed', 2300, 4],
+  ['real-24', 'Noor Bar', 55.7607, 37.6076, 'Тверская', 'bar', 'mixed', 2100, 4],
+  ['real-25', 'Mitzva Bar', 55.7601, 37.6363, 'Китай-город', 'bar', 'mixed', 2200, 3],
+  ['real-26', 'ABC Coffee Roasters', 55.7519, 37.6137, 'Охотный Ряд', 'cafe', 'dessert', 1400, 4],
+  ['real-27', 'Coffee Buro', 55.7662, 37.6018, 'Маяковская', 'cafe', 'dessert', 1200, 4],
+  ['real-28', 'Skuratov Coffee', 55.7595, 37.6335, 'Китай-город', 'cafe', 'dessert', 1100, 3],
+  ['real-29', 'Surf Coffee', 55.7612, 37.6085, 'Тверская', 'cafe', 'dessert', 1000, 3],
+  ['real-30', 'Babka Cafe', 55.7659, 37.5951, 'Пушкинская', 'cafe', 'vegetarian', 1600, 4],
+].map((row, i) => {
+  const [id, name, lat, lng, metro, venueKind, foodType, avgCheckValue, beautyScore] = row as [
+    string,
+    string,
+    number,
+    number,
+    string,
+    Place['venueKind'],
+    Place['foodType'],
+    number,
+    number,
+  ];
+  const distanceKm = Number((1.2 + (i % 10) * 0.55).toFixed(1));
+  const noise: Place['noise'] = venueKind === 'bar' ? 'high' : venueKind === 'cafe' ? 'low' : 'medium';
+  const cozy: Place['cozy'] = venueKind === 'bar' ? 'low' : 'high';
+  const price: Place['price'] = avgCheckValue < 1500 ? 'low' : avgCheckValue < 3000 ? 'medium' : 'high';
   return {
-    id: `p${idNum}`,
-    name: `${baseNames[i % baseNames.length]} ${idNum}`,
-    photos,
-    lat: 55.73 + (i % 10) * 0.004,
-    lng: 37.58 + (i % 10) * 0.005,
+    id,
+    name,
+    photos: mapPhotos(lat, lng),
+    lat,
+    lng,
+    beautyScore,
     distanceKm,
     venueKind,
     foodType,
     avgCheckValue,
-    location: `ул. Примерная, ${10 + idNum}`,
-    metro: metros[i % metros.length],
-    hours: i % 2 === 0 ? '10:00-23:00' : '12:00-02:00',
+    location: 'Москва',
+    metro,
+    hours: venueKind === 'bar' ? '18:00-03:00' : '10:00-23:00',
     avgCheck: `${avgCheckValue} RUB`,
-    description: `Место #${idNum}: быстрый выбор для сегодняшнего вечера.`,
-    vibe: `${venueKind === 'bar' ? 'атмосферный бар' : venueKind === 'cafe' ? 'спокойное кафе' : 'яркий ресторан'} с вайбом ${foodType}`,
-    menu: [...menuByFood[foodType], 'Фирменный напиток', 'Десерт дня'],
+    description: 'Реальное заведение Москвы, карточка подготовлена для наглядного выбора.',
+    vibe: venueKind === 'bar' ? 'атмосферный бар' : venueKind === 'cafe' ? 'уютное кафе' : 'популярный ресторан',
+    menu: ['Фирменное блюдо - 890 RUB', 'Основное блюдо - 1290 RUB', 'Десерт/напиток - 490 RUB'],
     noise,
     cozy,
     price,
     reviews: [
-      { author: 'Гость 1', rating: 5, text: 'Очень понравилась атмосфера.', source: 'Яндекс Карты' },
-      { author: 'Гость 2', rating: 4, text: 'Хорошее место, вернусь еще.', source: '2ГИС' },
+      { author: 'Пользователь', rating: 5, text: 'Хорошее место в своем формате.', source: 'Яндекс Карты' },
+      { author: 'Пользователь', rating: 4, text: 'Стабильный сервис и атмосфера.', source: '2ГИС' },
     ],
   };
 });
 
-export const PLACES: Place[] = [...WEB_PARSED_PLACES, ...SYNTHETIC_PLACES];
+export const PLACES: Place[] = [...WEB_PARSED_PLACES, ...REAL_EXTRA];

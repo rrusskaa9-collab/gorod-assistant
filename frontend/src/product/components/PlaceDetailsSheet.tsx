@@ -15,7 +15,10 @@ const buildRouteUrl = (place: Place) =>
 export const PlaceDetailsSheet = ({ place, onClose, onLike, onDislike }: Props) => {
   const [reviews, setReviews] = useState(place.reviews);
   const [loadingReviews, setLoadingReviews] = useState(false);
-  const routeUrl = buildRouteUrl(place);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const routeUrl = userCoords
+    ? `https://yandex.ru/maps/?rtext=${userCoords.lat}%2C${userCoords.lng}~${place.lat}%2C${place.lng}&rtt=auto`
+    : buildRouteUrl(place);
 
   useEffect(() => {
     let mounted = true;
@@ -33,6 +36,19 @@ export const PlaceDetailsSheet = ({ place, onClose, onLike, onDislike }: Props) 
       mounted = false;
     };
   }, [place]);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      () => {
+        setUserCoords(null);
+      },
+      { enableHighAccuracy: true, timeout: 4000, maximumAge: 60000 },
+    );
+  }, []);
 
   return (
     <div className="placeModalBackdrop" onClick={onClose}>
