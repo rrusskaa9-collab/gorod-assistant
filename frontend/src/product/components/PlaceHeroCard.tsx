@@ -20,14 +20,14 @@ export const PlaceHeroCard = ({ place, signals, onGo, onLike }: Props) => {
         <h3 className="placeHero__title">{place.name}</h3>
         <p className="placeHero__vibe">{place.vibe}</p>
         <div className="placeHero__actions">
-          <button className="actionBtn actionBtn--primary" onClick={() => onGo(place)}>
+          <button type="button" className="actionBtn actionBtn--primary" onClick={() => onGo(place)}>
             Пойти
           </button>
-          <button className="actionBtn" onClick={() => setShowWhy((v) => !v)}>
+          <button type="button" className="actionBtn" onClick={() => setShowWhy((v) => !v)}>
             Почему это мне
           </button>
           {onLike ? (
-            <button className="actionBtn" onClick={() => onLike(place)}>
+            <button type="button" className="actionBtn" onClick={() => onLike(place)}>
               Лайк
             </button>
           ) : null}

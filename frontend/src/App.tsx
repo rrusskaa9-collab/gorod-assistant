@@ -47,16 +47,32 @@ export default function App() {
       {tab === 'saved' ? <SavedScreen places={PLACES} savedIds={likedIds} /> : null}
 
       <nav className="bottomNav">
-        <button className={`bottomNav__btn ${tab === 'home' ? 'is-active' : ''}`} onClick={() => setTab('home')}>
+        <button
+          type="button"
+          className={`bottomNav__btn ${tab === 'home' ? 'is-active' : ''}`}
+          onClick={() => setTab('home')}
+        >
           Home
         </button>
-        <button className={`bottomNav__btn ${tab === 'swipe' ? 'is-active' : ''}`} onClick={() => setTab('swipe')}>
+        <button
+          type="button"
+          className={`bottomNav__btn ${tab === 'swipe' ? 'is-active' : ''}`}
+          onClick={() => setTab('swipe')}
+        >
           Swipe
         </button>
-        <button className={`bottomNav__btn ${tab === 'map' ? 'is-active' : ''}`} onClick={() => setTab('map')}>
+        <button
+          type="button"
+          className={`bottomNav__btn ${tab === 'map' ? 'is-active' : ''}`}
+          onClick={() => setTab('map')}
+        >
           Map
         </button>
-        <button className={`bottomNav__btn ${tab === 'saved' ? 'is-active' : ''}`} onClick={() => setTab('saved')}>
+        <button
+          type="button"
+          className={`bottomNav__btn ${tab === 'saved' ? 'is-active' : ''}`}
+          onClick={() => setTab('saved')}
+        >
           Saved
         </button>
       </nav>
