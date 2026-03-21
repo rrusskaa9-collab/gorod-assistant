@@ -1,154 +1,93 @@
 import type { Place } from './types';
 
-export const PLACES: Place[] = [
-  {
-    id: 'p1',
-    name: 'Neon Burger',
-    photos: [
-      'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=1200&q=80',
-    ],
-    lat: 55.7522,
-    lng: 37.6156,
-    location: 'Тверская ул., 9',
-    metro: 'Тверская',
-    hours: '12:00-02:00',
-    avgCheck: '1800 RUB',
-    description: 'Шумный бургер-бар для встречи с друзьями и быстрых ужинов.',
-    vibe: 'энергичный бургер-бар с музыкой',
-    menu: ['Чизбургер', 'Трюфель фри', 'Кола', 'BBQ бургер', 'Крафтовый лимонад'],
-    noise: 'high',
-    cozy: 'low',
-    price: 'medium',
-    reviews: [
-      { author: 'Алина', rating: 5, text: 'Сочно, быстро и очень живо вечером.', source: 'Яндекс Карты' },
-      { author: 'Игорь', rating: 4, text: 'Отличный бургер, но лучше бронировать.', source: '2ГИС' },
-    ],
-  },
-  {
-    id: 'p2',
-    name: 'Лес & Кофе',
-    photos: [
-      'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=80',
-    ],
-    lat: 55.7611,
-    lng: 37.6024,
-    location: 'Малая Бронная ул., 15',
-    metro: 'Пушкинская',
-    hours: '09:00-23:00',
-    avgCheck: '1400 RUB',
-    description: 'Тихое место с мягким светом для разговоров и работы.',
-    vibe: 'уютное тихое место для разговора',
-    menu: ['Капучино', 'Паста с грибами', 'Тирамису', 'Круассан', 'Матча латте'],
-    noise: 'low',
-    cozy: 'high',
-    price: 'medium',
-    reviews: [
-      { author: 'Мария', rating: 5, text: 'Спокойно и вкусный десерт.', source: 'Яндекс Карты' },
-      { author: 'Денис', rating: 4, text: 'Хорошо для встречи без шума.', source: '2ГИС' },
-    ],
-  },
-  {
-    id: 'p3',
-    name: 'Бар у Рейна',
-    photos: [
-      'https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=80',
-    ],
-    lat: 55.7472,
-    lng: 37.6288,
-    location: 'Садовническая наб., 27',
-    metro: 'Новокузнецкая',
-    hours: '17:00-03:00',
-    avgCheck: '2000 RUB',
-    description: 'Камерный бар с крафтом и авторскими коктейлями.',
-    vibe: 'уютный бар с крафтом и коктейлями',
-    menu: ['IPA', 'Негрони', 'Брускетта', 'Sour', 'Буррата'],
-    noise: 'medium',
-    cozy: 'high',
-    price: 'medium',
-    reviews: [
-      { author: 'Олег', rating: 5, text: 'Отличные коктейли и бармены.', source: 'Яндекс Карты' },
-      { author: 'Света', rating: 4, text: 'Приятный вайб, сели у стойки.', source: '2ГИС' },
-    ],
-  },
-  {
-    id: 'p4',
-    name: 'Basilico',
-    photos: [
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1428515613728-6b4607e44363?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1200&q=80',
-    ],
-    lat: 55.7593,
-    lng: 37.6182,
-    location: 'Большая Дмитровка, 11',
-    metro: 'Театральная',
-    hours: '11:00-00:00',
-    avgCheck: '2600 RUB',
-    description: 'Итальянская кухня и спокойный интерьер для ужина.',
-    vibe: 'спокойный итальянский ресторан',
-    menu: ['Пицца маргарита', 'Ризотто', 'Лимончелло', 'Фокачча', 'Паста песто'],
-    noise: 'low',
-    cozy: 'high',
-    price: 'high',
-    reviews: [
-      { author: 'Кирилл', rating: 5, text: 'Очень приятный сервис и паста.', source: 'Яндекс Карты' },
-      { author: 'Настя', rating: 4, text: 'Красивый интерьер, уютно.', source: '2ГИС' },
-    ],
-  },
-  {
-    id: 'p5',
-    name: 'Mia Cucina',
-    photos: [
-      'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80',
-    ],
-    lat: 55.7657,
-    lng: 37.5924,
-    location: 'Арбат, 22',
-    metro: 'Арбатская',
-    hours: '10:00-23:30',
-    avgCheck: '2400 RUB',
-    description: 'Неспешный ресторан для долгого ужина и вина.',
-    vibe: 'ресторан для неспешного ужина',
-    menu: ['Фокачча', 'Паста карбонара', 'Панна-котта', 'Салат цезарь', 'Лазанья'],
-    noise: 'low',
-    cozy: 'high',
-    price: 'high',
-    reviews: [
-      { author: 'Ира', rating: 5, text: 'Лучшее место для свидания.', source: 'Яндекс Карты' },
-      { author: 'Павел', rating: 4, text: 'Стабильно вкусно, берите десерты.', source: '2ГИС' },
-    ],
-  },
-  {
-    id: 'p6',
-    name: 'Vinyl Taproom',
-    photos: [
-      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1538485399081-7191377e8241?auto=format&fit=crop&w=1200&q=80',
-      'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80',
-    ],
-    lat: 55.7436,
-    lng: 37.6069,
-    location: 'Пятницкая ул., 41',
-    metro: 'Третьяковская',
-    hours: '16:00-02:00',
-    avgCheck: '1600 RUB',
-    description: 'Крафтовый бар с винилом и живой атмосферой.',
-    vibe: 'бар с крафтом и винилом',
-    menu: ['Sour Ale', 'Сидр', 'Начос', 'Пивная тарелка', 'Old Fashioned'],
-    noise: 'medium',
-    cozy: 'low',
-    price: 'low',
-    reviews: [
-      { author: 'Роман', rating: 5, text: 'Крутой выбор крафта, вернусь.', source: 'Яндекс Карты' },
-      { author: 'Лиза', rating: 4, text: 'Музыка супер, места мало после 21:00.', source: '2ГИС' },
-    ],
-  },
+const photoSets = [
+  [
+    'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=1200&q=80',
+  ],
+  [
+    'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?auto=format&fit=crop&w=1200&q=80',
+  ],
+  [
+    'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80',
+  ],
+  [
+    'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80',
+  ],
+  [
+    'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=80',
+  ],
 ];
+
+const baseNames = [
+  'Neon Burger',
+  'Лес & Кофе',
+  'Бар у Рейна',
+  'Basilico',
+  'Mia Cucina',
+  'Vinyl Taproom',
+  'Smoky Grill',
+  'Green Leaf',
+  'Fish Point',
+  'Nori House',
+];
+
+const metros = ['Тверская', 'Пушкинская', 'Новокузнецкая', 'Арбатская', 'Третьяковская', 'Белорусская'];
+const kinds: Place['venueKind'][] = ['restaurant', 'bar', 'cafe'];
+const foods: Place['foodType'][] = ['meat', 'vegetarian', 'asian', 'seafood', 'dessert', 'mixed'];
+
+const menuByFood: Record<Place['foodType'], string[]> = {
+  meat: ['Стейк', 'Бургер', 'BBQ ребра'],
+  vegetarian: ['Боул', 'Хумус', 'Овощи гриль'],
+  asian: ['Рамен', 'Том-ям', 'Суши'],
+  seafood: ['Поке', 'Креветки', 'Лосось терияки'],
+  dessert: ['Тирамису', 'Чизкейк', 'Круассан'],
+  mixed: ['Паста', 'Салат', 'Суп дня'],
+};
+
+export const PLACES: Place[] = Array.from({ length: 30 }, (_, i) => {
+  const idx = i + 1;
+  const foodType = foods[i % foods.length];
+  const venueKind = kinds[i % kinds.length];
+  const avgCheckValue = 900 + (i % 8) * 350;
+  const distanceKm = Number((0.6 + (i % 12) * 0.45).toFixed(1));
+  const noise: Place['noise'] = i % 3 === 0 ? 'high' : i % 3 === 1 ? 'medium' : 'low';
+  const cozy: Place['cozy'] = i % 2 === 0 ? 'high' : 'low';
+  const price: Place['price'] = avgCheckValue < 1500 ? 'low' : avgCheckValue < 2600 ? 'medium' : 'high';
+  const photos = photoSets[i % photoSets.length];
+
+  return {
+    id: `p${idx}`,
+    name: `${baseNames[i % baseNames.length]} ${idx}`,
+    photos,
+    lat: 55.73 + (i % 10) * 0.004,
+    lng: 37.58 + (i % 10) * 0.005,
+    distanceKm,
+    venueKind,
+    foodType,
+    avgCheckValue,
+    location: `ул. Примерная, ${10 + idx}`,
+    metro: metros[i % metros.length],
+    hours: i % 2 === 0 ? '10:00-23:00' : '12:00-02:00',
+    avgCheck: `${avgCheckValue} RUB`,
+    description: `Место #${idx}: быстрый выбор для сегодняшнего вечера.`,
+    vibe: `${venueKind === 'bar' ? 'атмосферный бар' : venueKind === 'cafe' ? 'спокойное кафе' : 'яркий ресторан'} с вайбом ${foodType}`,
+    menu: [...menuByFood[foodType], 'Фирменный напиток', 'Десерт дня'],
+    noise,
+    cozy,
+    price,
+    reviews: [
+      { author: 'Гость 1', rating: 5, text: 'Очень понравилась атмосфера.', source: 'Яндекс Карты' },
+      { author: 'Гость 2', rating: 4, text: 'Хорошее место, вернусь еще.', source: '2ГИС' },
+    ],
+  };
+});

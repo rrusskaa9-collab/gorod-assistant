@@ -1,6 +1,8 @@
 export type NoiseLevel = 'low' | 'medium' | 'high';
 export type CozyLevel = 'low' | 'high';
 export type PriceLevel = 'low' | 'medium' | 'high';
+export type FoodType = 'meat' | 'vegetarian' | 'asian' | 'seafood' | 'dessert' | 'mixed';
+export type VenueKind = 'restaurant' | 'bar' | 'cafe';
 
 export type PlaceReview = {
   author: string;
@@ -16,6 +18,10 @@ export type Place = {
   photos: string[];
   lat: number;
   lng: number;
+  distanceKm: number;
+  venueKind: VenueKind;
+  foodType: FoodType;
+  avgCheckValue: number;
   location: string;
   metro: string;
   hours: string;

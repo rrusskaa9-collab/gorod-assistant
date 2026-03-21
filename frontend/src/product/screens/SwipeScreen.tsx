@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PlaceDetailsSheet } from '../components/PlaceDetailsSheet';
 import type { Place } from '../types';
 
@@ -17,12 +17,39 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
   const [dragging, setDragging] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const current = useMemo(() => places[index % places.length], [index, places]);
-  const next = useMemo(() => places[(index + 1) % places.length], [index, places]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [maxRadius, setMaxRadius] = useState(8);
+  const [maxAvgCheck, setMaxAvgCheck] = useState(3500);
+  const [foodType, setFoodType] = useState<'all' | Place['foodType']>('all');
+  const [venueKind, setVenueKind] = useState<'all' | Place['venueKind']>('all');
 
-  if (!current) return null;
+  const filteredPlaces = useMemo(
+    () =>
+      places.filter((p) => {
+        if (p.distanceKm > maxRadius) return false;
+        if (p.avgCheckValue > maxAvgCheck) return false;
+        if (foodType !== 'all' && p.foodType !== foodType) return false;
+        if (venueKind !== 'all' && p.venueKind !== venueKind) return false;
+        return true;
+      }),
+    [places, maxRadius, maxAvgCheck, foodType, venueKind],
+  );
 
-  const maxPhotoIndex = Math.max(0, current.photos.length - 1);
+  const current = useMemo(() => {
+    if (filteredPlaces.length === 0) return null;
+    return filteredPlaces[index % filteredPlaces.length];
+  }, [filteredPlaces, index]);
+  const next = useMemo(() => {
+    if (filteredPlaces.length < 2) return null;
+    return filteredPlaces[(index + 1) % filteredPlaces.length];
+  }, [filteredPlaces, index]);
+
+  const maxPhotoIndex = Math.max(0, (current?.photos.length ?? 1) - 1);
+
+  useEffect(() => {
+    setPhotoIndex(0);
+    setDetailsOpen(false);
+  }, [current?.id]);
 
   const prevPhoto = () => setPhotoIndex((prev) => Math.max(0, prev - 1));
   const nextPhoto = () => setPhotoIndex((prev) => Math.min(maxPhotoIndex, prev + 1));
@@ -42,6 +69,7 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
   };
 
   const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
+    if (!current) return;
     const x0 = startX.current;
     const x1 = e.changedTouches[0]?.clientX;
     setDragging(false);
@@ -78,6 +106,7 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
   };
 
   const onPointerUp: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (!current) return;
     if (!pointerDown.current) return;
     pointerDown.current = false;
     setDragging(false);
@@ -118,12 +147,14 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
   const openDetails = () => setDetailsOpen(true);
 
   const closeAndAdvanceLike = (_place?: Place) => {
+    if (!current) return;
     onSwipeLike(current);
     setPhotoIndex(0);
     setDetailsOpen(false);
   };
 
   const closeAndAdvanceDislike = (_place?: Place) => {
+    if (!current) return;
     onSwipeDislike(current);
     setPhotoIndex(0);
     setDetailsOpen(false);
@@ -131,70 +162,135 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
 
   return (
     <section className="screen">
-      <h2 className="screen__title">Лента вайбов</h2>
-      <div className="swipeDeck">
-        {next ? (
-          <div className="swipeCard swipeCard--next" aria-hidden>
-            <img className="swipeCard__photo" src={next.photos[0]} alt="" />
-          </div>
-        ) : null}
-        <div
-          className={`swipeCard swipeCard--active ${dragging ? 'is-dragging' : ''}`}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          style={{
-            transform: `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`,
-          }}
-        >
-          <div className="swipeCard__gallery" onTouchStart={onGalleryTouchStart} onTouchEnd={onGalleryTouchEnd}>
-            <img className="swipeCard__photo" src={current.photos[photoIndex]} alt={current.name} />
-            <div className="swipeCard__galleryActions">
-              <button type="button" className="galleryArrow" onClick={prevPhoto} disabled={photoIndex === 0}>
-                ‹
-              </button>
-              <button
-                type="button"
-                className="galleryArrow"
-                onClick={nextPhoto}
-                disabled={photoIndex === maxPhotoIndex}
-              >
-                ›
-              </button>
-            </div>
-            <div className="swipeCard__dots">
-              {current.photos.map((_, i) => (
-                <span key={`${current.id}-dot-${i}`} className={`swipeCard__dot ${i === photoIndex ? 'is-active' : ''}`} />
-              ))}
-            </div>
-          </div>
-          <div className="swipeCard__overlay" onClick={openDetails}>
-            <h3 className="swipeCard__title">{current.name}</h3>
-            <p className="swipeCard__vibe">{current.vibe}</p>
-            <div className="swipeCard__hints">← не нравится · нравится → · нажми для деталей</div>
-          </div>
+      <div className="swipeTopBar">
+        <h2 className="screen__title">Лента вайбов</h2>
+        <button type="button" className="settingsBtn" onClick={() => setSettingsOpen((v) => !v)}>
+          Настройки
+        </button>
+      </div>
+      {settingsOpen ? (
+        <div className="settingsPanel">
+          <label className="settingsRow">
+            Радиус: {maxRadius.toFixed(1)} км
+            <input
+              type="range"
+              min={0.5}
+              max={20}
+              step={0.5}
+              value={maxRadius}
+              onChange={(e) => setMaxRadius(Number(e.target.value))}
+            />
+          </label>
+          <label className="settingsRow">
+            Средний чек до: {maxAvgCheck} RUB
+            <input
+              type="range"
+              min={500}
+              max={5000}
+              step={100}
+              value={maxAvgCheck}
+              onChange={(e) => setMaxAvgCheck(Number(e.target.value))}
+            />
+          </label>
+          <label className="settingsRow">
+            Тип кухни
+            <select value={foodType} onChange={(e) => setFoodType(e.target.value as typeof foodType)}>
+              <option value="all">Все</option>
+              <option value="meat">Мясной</option>
+              <option value="vegetarian">Вегетарианский</option>
+              <option value="asian">Азиатский</option>
+              <option value="seafood">Морепродукты</option>
+              <option value="dessert">Десерты</option>
+              <option value="mixed">Смешанный</option>
+            </select>
+          </label>
+          <label className="settingsRow">
+            Формат
+            <select value={venueKind} onChange={(e) => setVenueKind(e.target.value as typeof venueKind)}>
+              <option value="all">Все</option>
+              <option value="restaurant">Ресторан</option>
+              <option value="bar">Бар</option>
+              <option value="cafe">Кафе</option>
+            </select>
+          </label>
+          <div className="settingsHint">Карточек по фильтру: {filteredPlaces.length}</div>
         </div>
-      </div>
-      <div className="swipeActions">
-        <button type="button" className="actionBtn" onClick={() => onSwipeDislike(current)}>
-          Не нравится
-        </button>
-        <button type="button" className="actionBtn actionBtn--primary" onClick={() => onSwipeLike(current)}>
-          Нравится
-        </button>
-      </div>
+      ) : null}
+      {!current ? (
+        <div className="emptySwipeState">
+          По текущим фильтрам нет карточек. Расширь радиус или средний чек.
+        </div>
+      ) : null}
+      {current ? (
+        <>
+          <div className="swipeDeck">
+            {next ? (
+              <div className="swipeCard swipeCard--next" aria-hidden>
+                <img className="swipeCard__photo" src={next.photos[0]} alt="" />
+              </div>
+            ) : null}
+            <div
+              className={`swipeCard swipeCard--active ${dragging ? 'is-dragging' : ''}`}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
+              style={{
+                transform: `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`,
+              }}
+            >
+              <div className="swipeCard__gallery" onTouchStart={onGalleryTouchStart} onTouchEnd={onGalleryTouchEnd}>
+                <img className="swipeCard__photo" src={current.photos[photoIndex]} alt={current.name} />
+                <div className="swipeCard__galleryActions">
+                  <button type="button" className="galleryArrow" onClick={prevPhoto} disabled={photoIndex === 0}>
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="galleryArrow"
+                    onClick={nextPhoto}
+                    disabled={photoIndex === maxPhotoIndex}
+                  >
+                    ›
+                  </button>
+                </div>
+                <div className="swipeCard__dots">
+                  {current.photos.map((_, i) => (
+                    <span
+                      key={`${current.id}-dot-${i}`}
+                      className={`swipeCard__dot ${i === photoIndex ? 'is-active' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="swipeCard__overlay" onClick={openDetails}>
+                <h3 className="swipeCard__title">{current.name}</h3>
+                <p className="swipeCard__vibe">{current.vibe}</p>
+                <div className="swipeCard__hints">← не нравится · нравится → · нажми для деталей</div>
+              </div>
+            </div>
+          </div>
+          <div className="swipeActions">
+            <button type="button" className="actionBtn" onClick={() => onSwipeDislike(current)}>
+              Не нравится
+            </button>
+            <button type="button" className="actionBtn actionBtn--primary" onClick={() => onSwipeLike(current)}>
+              Нравится
+            </button>
+          </div>
 
-      {detailsOpen ? (
-        <PlaceDetailsSheet
-          place={current}
-          onClose={() => setDetailsOpen(false)}
-          onLike={closeAndAdvanceLike}
-          onDislike={closeAndAdvanceDislike}
-        />
+          {detailsOpen ? (
+            <PlaceDetailsSheet
+              place={current}
+              onClose={() => setDetailsOpen(false)}
+              onLike={closeAndAdvanceLike}
+              onDislike={closeAndAdvanceDislike}
+            />
+          ) : null}
+        </>
       ) : null}
     </section>
   );
