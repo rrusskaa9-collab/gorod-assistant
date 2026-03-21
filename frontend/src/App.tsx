@@ -1,49 +1,65 @@
-import { useCallback, useEffect, useState } from 'react';
-import vkBridge from '@vkontakte/vk-bridge';
-import { Panel, PanelHeader, PanelHeaderBack, View } from '@vkontakte/vkui';
-import { MainPanel } from './vk/MainPanel';
-import { DetailPanel } from './vk/DetailPanel';
-import type { SearchEntity } from './vk/types';
+import { useMemo, useState } from 'react';
+import { PLACES } from './product/mockPlaces';
+import { HomeScreen } from './product/screens/HomeScreen';
+import { MapScreen } from './product/screens/MapScreen';
+import { SavedScreen } from './product/screens/SavedScreen';
+import { SwipeScreen } from './product/screens/SwipeScreen';
+import type { Place } from './product/types';
+import './product/product.css';
 
 export default function App() {
-  const [history, setHistory] = useState<string[]>(['main']);
-  const [selectedEntity, setSelectedEntity] = useState<SearchEntity | null>(null);
+  const [tab, setTab] = useState<'home' | 'swipe' | 'map' | 'saved'>('home');
+  const [likedIds, setLikedIds] = useState<string[]>([]);
+  const [dislikedIds, setDislikedIds] = useState<string[]>([]);
+  const [checkedInIds, setCheckedInIds] = useState<string[]>([]);
+  const [swipeIndex, setSwipeIndex] = useState(0);
 
-  const activePanel = history[history.length - 1];
-  const isFirst = history.length === 1;
+  const signals = useMemo(
+    () => ({ likedIds, dislikedIds, checkedInIds }),
+    [likedIds, dislikedIds, checkedInIds],
+  );
 
-  const goBack = useCallback(() => {
-    if (history.length <= 1) return;
-    setHistory((prev) => prev.slice(0, -1));
-  }, [history.length]);
+  const like = (place: Place) => {
+    setLikedIds((prev) => (prev.includes(place.id) ? prev : [...prev, place.id]));
+    setDislikedIds((prev) => prev.filter((id) => id !== place.id));
+    setSwipeIndex((x) => x + 1);
+  };
 
-  const openDetails = useCallback((entity: SearchEntity) => {
-    setSelectedEntity(entity);
-    setHistory((prev) => [...prev, 'details']);
-  }, []);
+  const dislike = (place: Place) => {
+    setDislikedIds((prev) => (prev.includes(place.id) ? prev : [...prev, place.id]));
+    setSwipeIndex((x) => x + 1);
+  };
 
-  // Для стандартных mini apps — включаем/выключаем свайпбек.
-  useEffect(() => {
-    try {
-      // Вне VK окружения bridge может быть недоступен.
-      (vkBridge as any).send?.('VKWebAppSetSwipeSettings', { history: isFirst });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn('[vk-bridge] VKWebAppSetSwipeSettings failed:', e);
-    }
-  }, [isFirst]);
+  const checkIn = (place: Place) => {
+    setCheckedInIds((prev) => (prev.includes(place.id) ? prev : [...prev, place.id]));
+    setLikedIds((prev) => (prev.includes(place.id) ? prev : [...prev, place.id]));
+  };
 
   return (
-    <View history={history} activePanel={activePanel} onSwipeBack={goBack}>
-      <Panel id="main">
-        <PanelHeader>Городской ассистент</PanelHeader>
-        <MainPanel onOpenEntity={openDetails} />
-      </Panel>
+    <div className="appShell">
+      {tab === 'home' ? (
+        <HomeScreen places={PLACES} signals={signals} onLike={like} onCheckIn={checkIn} />
+      ) : null}
+      {tab === 'swipe' ? (
+        <SwipeScreen places={PLACES} index={swipeIndex} onSwipeLike={like} onSwipeDislike={dislike} />
+      ) : null}
+      {tab === 'map' ? <MapScreen places={PLACES} onCheckIn={checkIn} /> : null}
+      {tab === 'saved' ? <SavedScreen places={PLACES} savedIds={likedIds} /> : null}
 
-      <Panel id="details">
-        <PanelHeader before={<PanelHeaderBack onClick={goBack} />}>Детали</PanelHeader>
-        {selectedEntity ? <DetailPanel entity={selectedEntity} /> : null}
-      </Panel>
-    </View>
+      <nav className="bottomNav">
+        <button className={`bottomNav__btn ${tab === 'home' ? 'is-active' : ''}`} onClick={() => setTab('home')}>
+          Home
+        </button>
+        <button className={`bottomNav__btn ${tab === 'swipe' ? 'is-active' : ''}`} onClick={() => setTab('swipe')}>
+          Swipe
+        </button>
+        <button className={`bottomNav__btn ${tab === 'map' ? 'is-active' : ''}`} onClick={() => setTab('map')}>
+          Map
+        </button>
+        <button className={`bottomNav__btn ${tab === 'saved' ? 'is-active' : ''}`} onClick={() => setTab('saved')}>
+          Saved
+        </button>
+      </nav>
+    </div>
   );
 }
