@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { PlaceDetailsSheet } from '../components/PlaceDetailsSheet';
 import type { Place } from '../types';
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Props) => {
   const startX = useRef<number | null>(null);
   const photoStartX = useRef<number | null>(null);
+  const pointerDown = useRef(false);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -27,12 +29,14 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
 
   const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
     startX.current = e.changedTouches[0]?.clientX ?? null;
+    pointerDown.current = true;
     setDragging(true);
   };
 
   const onTouchMove: React.TouchEventHandler<HTMLDivElement> = (e) => {
     const x0 = startX.current;
     const x1 = e.changedTouches[0]?.clientX;
+    pointerDown.current = false;
     if (x0 == null || x1 == null) return;
     setDragX(x1 - x0);
   };
@@ -46,6 +50,43 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
       return;
     }
     const dx = x1 - x0;
+    if (dx > 70) {
+      onSwipeLike(current);
+      setDragX(0);
+      return;
+    }
+    if (dx < -70) {
+      onSwipeDislike(current);
+      setDragX(0);
+      return;
+    }
+    setDragX(0);
+  };
+
+  const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (e.pointerType === 'touch') return;
+    startX.current = e.clientX;
+    pointerDown.current = true;
+    setDragging(true);
+  };
+
+  const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (!pointerDown.current) return;
+    const x0 = startX.current;
+    if (x0 == null) return;
+    setDragX(e.clientX - x0);
+  };
+
+  const onPointerUp: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (!pointerDown.current) return;
+    pointerDown.current = false;
+    setDragging(false);
+    const x0 = startX.current;
+    if (x0 == null) {
+      setDragX(0);
+      return;
+    }
+    const dx = e.clientX - x0;
     if (dx > 70) {
       onSwipeLike(current);
       setDragX(0);
@@ -76,13 +117,13 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
 
   const openDetails = () => setDetailsOpen(true);
 
-  const closeAndAdvanceLike = () => {
+  const closeAndAdvanceLike = (_place?: Place) => {
     onSwipeLike(current);
     setPhotoIndex(0);
     setDetailsOpen(false);
   };
 
-  const closeAndAdvanceDislike = () => {
+  const closeAndAdvanceDislike = (_place?: Place) => {
     onSwipeDislike(current);
     setPhotoIndex(0);
     setDetailsOpen(false);
@@ -102,6 +143,10 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
           style={{
             transform: `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`,
           }}
@@ -144,45 +189,12 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
       </div>
 
       {detailsOpen ? (
-        <div className="placeModalBackdrop" onClick={() => setDetailsOpen(false)}>
-          <div className="placeModal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="placeModal__title">{current.name}</h3>
-            <div className="placeModal__meta">
-              <div>Местоположение: {current.location}</div>
-              <div>Метро: {current.metro}</div>
-              <div>Время работы: {current.hours}</div>
-              <div>Средний чек: {current.avgCheck}</div>
-            </div>
-            <p className="placeModal__desc">{current.description}</p>
-            <div className="placeModal__blockTitle">Меню</div>
-            <div className="placeModal__chips">
-              {current.menu.map((item) => (
-                <span key={`${current.id}-menu-${item}`} className="placeModal__chip">
-                  {item}
-                </span>
-              ))}
-            </div>
-            <div className="placeModal__blockTitle">Отзывы</div>
-            <div className="placeModal__reviews">
-              {current.reviews.map((r, idx) => (
-                <div className="placeModal__review" key={`${current.id}-review-${idx}`}>
-                  <div className="placeModal__reviewHead">
-                    {r.author} · {r.rating}/5
-                  </div>
-                  <div>{r.text}</div>
-                </div>
-              ))}
-            </div>
-            <div className="swipeActions">
-              <button type="button" className="actionBtn" onClick={closeAndAdvanceDislike}>
-                Не нравится
-              </button>
-              <button type="button" className="actionBtn actionBtn--primary" onClick={closeAndAdvanceLike}>
-                Нравится
-              </button>
-            </div>
-          </div>
-        </div>
+        <PlaceDetailsSheet
+          place={current}
+          onClose={() => setDetailsOpen(false)}
+          onLike={closeAndAdvanceLike}
+          onDislike={closeAndAdvanceDislike}
+        />
       ) : null}
     </section>
   );

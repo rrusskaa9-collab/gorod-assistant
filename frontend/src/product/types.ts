@@ -6,6 +6,8 @@ export type PlaceReview = {
   author: string;
   rating: number;
   text: string;
+  source: 'Яндекс Карты' | '2ГИС';
+  sourceUrl?: string;
 };
 
 export type Place = {

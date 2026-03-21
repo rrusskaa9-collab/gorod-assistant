@@ -22,8 +22,8 @@ export const PLACES: Place[] = [
     cozy: 'low',
     price: 'medium',
     reviews: [
-      { author: 'Алина', rating: 5, text: 'Сочно, быстро и очень живо вечером.' },
-      { author: 'Игорь', rating: 4, text: 'Отличный бургер, но лучше бронировать.' },
+      { author: 'Алина', rating: 5, text: 'Сочно, быстро и очень живо вечером.', source: 'Яндекс Карты' },
+      { author: 'Игорь', rating: 4, text: 'Отличный бургер, но лучше бронировать.', source: '2ГИС' },
     ],
   },
   {
@@ -47,8 +47,8 @@ export const PLACES: Place[] = [
     cozy: 'high',
     price: 'medium',
     reviews: [
-      { author: 'Мария', rating: 5, text: 'Спокойно и вкусный десерт.' },
-      { author: 'Денис', rating: 4, text: 'Хорошо для встречи без шума.' },
+      { author: 'Мария', rating: 5, text: 'Спокойно и вкусный десерт.', source: 'Яндекс Карты' },
+      { author: 'Денис', rating: 4, text: 'Хорошо для встречи без шума.', source: '2ГИС' },
     ],
   },
   {
@@ -72,8 +72,8 @@ export const PLACES: Place[] = [
     cozy: 'high',
     price: 'medium',
     reviews: [
-      { author: 'Олег', rating: 5, text: 'Отличные коктейли и бармены.' },
-      { author: 'Света', rating: 4, text: 'Приятный вайб, сели у стойки.' },
+      { author: 'Олег', rating: 5, text: 'Отличные коктейли и бармены.', source: 'Яндекс Карты' },
+      { author: 'Света', rating: 4, text: 'Приятный вайб, сели у стойки.', source: '2ГИС' },
     ],
   },
   {
@@ -97,8 +97,8 @@ export const PLACES: Place[] = [
     cozy: 'high',
     price: 'high',
     reviews: [
-      { author: 'Кирилл', rating: 5, text: 'Очень приятный сервис и паста.' },
-      { author: 'Настя', rating: 4, text: 'Красивый интерьер, уютно.' },
+      { author: 'Кирилл', rating: 5, text: 'Очень приятный сервис и паста.', source: 'Яндекс Карты' },
+      { author: 'Настя', rating: 4, text: 'Красивый интерьер, уютно.', source: '2ГИС' },
     ],
   },
   {
@@ -122,8 +122,8 @@ export const PLACES: Place[] = [
     cozy: 'high',
     price: 'high',
     reviews: [
-      { author: 'Ира', rating: 5, text: 'Лучшее место для свидания.' },
-      { author: 'Павел', rating: 4, text: 'Стабильно вкусно, берите десерты.' },
+      { author: 'Ира', rating: 5, text: 'Лучшее место для свидания.', source: 'Яндекс Карты' },
+      { author: 'Павел', rating: 4, text: 'Стабильно вкусно, берите десерты.', source: '2ГИС' },
     ],
   },
   {
@@ -147,8 +147,8 @@ export const PLACES: Place[] = [
     cozy: 'low',
     price: 'low',
     reviews: [
-      { author: 'Роман', rating: 5, text: 'Крутой выбор крафта, вернусь.' },
-      { author: 'Лиза', rating: 4, text: 'Музыка супер, места мало после 21:00.' },
+      { author: 'Роман', rating: 5, text: 'Крутой выбор крафта, вернусь.', source: 'Яндекс Карты' },
+      { author: 'Лиза', rating: 4, text: 'Музыка супер, места мало после 21:00.', source: '2ГИС' },
     ],
   },
 ];
