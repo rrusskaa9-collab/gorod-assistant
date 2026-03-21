@@ -46,7 +46,7 @@ export const MapScreen = ({ places, onCheckIn }: Props) => {
       </div>
       {selected ? (
         <div className="mapPlaceCard">
-          <img src={selected.photo} className="mapPlaceCard__photo" alt={selected.name} />
+          <img src={selected.photos[0]} className="mapPlaceCard__photo" alt={selected.name} />
           <div>
             <div className="mapPlaceCard__name">{selected.name}</div>
             <div className="mapPlaceCard__vibe">{selected.vibe}</div>

@@ -15,7 +15,7 @@ export const SavedScreen = ({ places, savedIds }: Props) => {
       <div className="savedGrid">
         {saved.map((place) => (
           <article key={place.id} className="savedTile">
-            <img src={place.photo} alt={place.name} />
+            <img src={place.photos[0]} alt={place.name} />
             <div className="savedTile__name">{place.name}</div>
           </article>
         ))}

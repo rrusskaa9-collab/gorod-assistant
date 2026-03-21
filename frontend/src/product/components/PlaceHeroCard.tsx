@@ -14,7 +14,7 @@ export const PlaceHeroCard = ({ place, signals, onGo, onLike }: Props) => {
 
   return (
     <article className="placeHero">
-      <img className="placeHero__photo" src={place.photo} alt={place.name} loading="lazy" />
+      <img className="placeHero__photo" src={place.photos[0]} alt={place.name} loading="lazy" />
       <div className="placeHero__overlay">
         <div className="placeHero__badge">тебе подойдет</div>
         <h3 className="placeHero__title">{place.name}</h3>
