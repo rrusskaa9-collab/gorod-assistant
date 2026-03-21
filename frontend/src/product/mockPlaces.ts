@@ -1,10 +1,7 @@
 import type { Place } from './types';
+import { getInteriorPhotos } from './photoResolver';
 
-const yMap = (lat: number, lng: number) =>
-  `https://static-maps.yandex.ru/1.x/?lang=ru_RU&ll=${lng},${lat}&size=650,450&z=16&l=map&pt=${lng},${lat},pm2rdm`;
-const dgisMap = (lat: number, lng: number) =>
-  `https://static.maps.2gis.com/1.0?center=${lng},${lat}&zoom=16&size=650,450&markers=${lng},${lat}`;
-const mapPhotos = (lat: number, lng: number) => [yMap(lat, lng), dgisMap(lat, lng), yMap(lat + 0.0012, lng + 0.0012)];
+const mapPhotos = (lat: number, lng: number) => getInteriorPhotos(`${lat.toFixed(4)},${lng.toFixed(4)}`);
 
 const WEB_PARSED_PLACES: Place[] = [
   {

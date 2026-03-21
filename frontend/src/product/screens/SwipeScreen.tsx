@@ -10,8 +10,19 @@ type Props = {
 };
 
 export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Props) => {
-  const startX = useRef<number | null>(null);
-  const pointerDown = useRef(false);
+  const pointerState = useRef<{
+    pointerId: number | null;
+    downAtMs: number;
+    startX: number;
+    startY: number;
+    moved: boolean;
+  }>({
+    pointerId: null,
+    downAtMs: 0,
+    startX: 0,
+    startY: 0,
+    moved: false,
+  });
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -52,93 +63,96 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
     setDetailsOpen(false);
   }, [current?.id]);
 
-  const prevPhoto = () => setPhotoIndex((prev) => Math.max(0, prev - 1));
   const nextPhoto = () => setPhotoIndex((prev) => Math.min(maxPhotoIndex, prev + 1));
 
-  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    startX.current = e.changedTouches[0]?.clientX ?? null;
-    pointerDown.current = true;
-    setDragging(true);
-  };
+  const DRAG_START_THRESHOLD = 8;
+  const SWIPE_THRESHOLD = 70;
+  const TAP_MOVE_THRESHOLD = 8;
+  const TAP_TIME_THRESHOLD_MS = 260;
 
-  const onTouchMove: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    const x0 = startX.current;
-    const x1 = e.changedTouches[0]?.clientX;
-    pointerDown.current = true;
-    if (x0 == null || x1 == null) return;
-    setDragX(x1 - x0);
-  };
-
-  const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    if (!current) return;
-    const x0 = startX.current;
-    const x1 = e.changedTouches[0]?.clientX;
+  const finishGesture = () => {
+    pointerState.current.pointerId = null;
+    pointerState.current.moved = false;
     setDragging(false);
-    if (x0 == null || x1 == null) {
-      setDragX(0);
-      return;
-    }
-    const dx = x1 - x0;
-    if (dx > 70) {
-      onSwipeLike(current);
-      setDragX(0);
-      return;
-    }
-    if (dx < -70) {
-      onSwipeDislike(current);
-      setDragX(0);
-      return;
-    }
     setDragX(0);
   };
 
+  const onCardZoneTap = (clientX: number, card: HTMLDivElement) => {
+    if (!current) return;
+    const rect = card.getBoundingClientRect();
+    const zone = (clientX - rect.left) / rect.width;
+
+    if (zone < 0.3) {
+      onSwipeDislike(current);
+      return;
+    }
+    if (zone > 0.7) {
+      nextPhoto();
+      return;
+    }
+    openDetails();
+  };
+
   const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
-    if (e.pointerType === 'touch') return;
-    startX.current = e.clientX;
-    pointerDown.current = true;
-    setDragging(true);
+    pointerState.current.pointerId = e.pointerId;
+    pointerState.current.startX = e.clientX;
+    pointerState.current.startY = e.clientY;
+    pointerState.current.downAtMs = performance.now();
+    pointerState.current.moved = false;
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
-    if (!pointerDown.current) return;
-    const x0 = startX.current;
-    if (x0 == null) return;
-    setDragX(e.clientX - x0);
+    if (pointerState.current.pointerId !== e.pointerId) return;
+    const dx = e.clientX - pointerState.current.startX;
+    const dy = e.clientY - pointerState.current.startY;
+
+    if (!pointerState.current.moved && Math.hypot(dx, dy) >= DRAG_START_THRESHOLD) {
+      pointerState.current.moved = true;
+    }
+
+    // Start drag only on horizontal intent to preserve page vertical scroll.
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) >= DRAG_START_THRESHOLD) {
+      setDragging(true);
+      setDragX(dx);
+    }
   };
 
   const onPointerUp: React.PointerEventHandler<HTMLDivElement> = (e) => {
     if (!current) return;
-    if (!pointerDown.current) return;
-    pointerDown.current = false;
-    setDragging(false);
+    if (pointerState.current.pointerId !== e.pointerId) return;
+
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
-    const x0 = startX.current;
-    if (x0 == null) {
-      setDragX(0);
-      return;
-    }
-    const dx = e.clientX - x0;
-    if (dx > 70) {
-      onSwipeLike(current);
-      setDragX(0);
-      return;
-    }
-    if (dx < -70) {
-      onSwipeDislike(current);
-      setDragX(0);
-      return;
-    }
-    setDragX(0);
-  };
 
-  const onCardTapForPhoto = (clientX: number, card: HTMLDivElement) => {
-    const rect = card.getBoundingClientRect();
-    const localX = clientX - rect.left;
-    if (localX < rect.width / 2) prevPhoto();
-    else nextPhoto();
+    const dx = e.clientX - pointerState.current.startX;
+    const dy = e.clientY - pointerState.current.startY;
+    const movedDistance = Math.hypot(dx, dy);
+    const heldMs = performance.now() - pointerState.current.downAtMs;
+    const isTap = movedDistance <= TAP_MOVE_THRESHOLD && heldMs <= TAP_TIME_THRESHOLD_MS;
+    const isDragGesture = Math.abs(dx) > Math.abs(dy) && Math.abs(dx) >= DRAG_START_THRESHOLD;
+    const target = e.target as HTMLElement | null;
+    const isInteractiveTarget = Boolean(target?.closest('button, a, input, select, textarea'));
+
+    if (isDragGesture && dx >= SWIPE_THRESHOLD) {
+      onSwipeLike(current);
+      finishGesture();
+      return;
+    }
+    if (isDragGesture && dx <= -SWIPE_THRESHOLD) {
+      onSwipeDislike(current);
+      finishGesture();
+      return;
+    }
+
+    if (isTap && !isInteractiveTarget) {
+      onCardZoneTap(e.clientX, e.currentTarget);
+      finishGesture();
+      return;
+    }
+
+    finishGesture();
   };
 
   const openDetails = () => setDetailsOpen(true);
@@ -157,20 +171,12 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
     setDetailsOpen(false);
   };
 
-  const onCardClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
-    if (!current) return;
-    if (Math.abs(dragX) > 8) return;
-    onCardTapForPhoto(e.clientX, e.currentTarget);
-  };
-
-  const onCardTouchEnd: React.TouchEventHandler<HTMLDivElement> = (e) => {
-    onTouchEnd(e);
-    if (!current) return;
-    const x0 = startX.current;
-    const x1 = e.changedTouches[0]?.clientX;
-    if (x0 == null || x1 == null) return;
-    const dx = Math.abs(x1 - x0);
-    if (dx < 12) onCardTapForPhoto(x1, e.currentTarget);
+  const onPointerCancel: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (pointerState.current.pointerId !== e.pointerId) return;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    finishGesture();
   };
 
   return (
@@ -255,16 +261,13 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
             ) : null}
             <div
               className={`swipeCard swipeCard--active ${dragging ? 'is-dragging' : ''}`}
-              onTouchStart={onTouchStart}
-              onTouchMove={onTouchMove}
-              onTouchEnd={onCardTouchEnd}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
-              onPointerCancel={onPointerUp}
-              onClick={onCardClick}
+              onPointerCancel={onPointerCancel}
               style={{
                 transform: `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`,
+                opacity: 1 - Math.min(Math.abs(dragX) / 360, 0.28),
               }}
             >
               <div className="swipeCard__gallery">
@@ -278,16 +281,10 @@ export const SwipeScreen = ({ places, index, onSwipeLike, onSwipeDislike }: Prop
                   ))}
                 </div>
               </div>
-              <div
-                className="swipeCard__overlay"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  openDetails();
-                }}
-              >
+              <div className="swipeCard__overlay">
                 <h3 className="swipeCard__title">{current.name}</h3>
                 <p className="swipeCard__vibe">{current.vibe}</p>
-                <div className="swipeCard__hints">Тап слева/справа: фото · Свайп: лайк/дизлайк</div>
+                <div className="swipeCard__hints">Левая зона: дизлайк · Центр: детали · Правая: следующее фото</div>
                 <button
                   type="button"
                   className="swipeInfoBtn"
